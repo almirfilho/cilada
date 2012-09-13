@@ -4,8 +4,7 @@
 }
 
 canvas {
-	position: relative;
-	top: 50px;
-	left: 100px;
-	background: #666;
+	position: absolute;
+	/*background: #666;*/
+	border: 1px solid #999;
 }
