@@ -27,8 +27,6 @@ ball =
   radius: 0.5
   newPosition: null
   obj: null
-  # x: config.width / 2
-  # y: config.height / 2
 
 $canvas = $ 'canvas'
 ctx     = $canvas[0].getContext '2d'
@@ -130,6 +128,7 @@ update = () ->
 init()
 requestAnimFrame update
 
+# capturando eventos do acelerometro
 orientation = false
 
 if window.DeviceOrientationEvent
