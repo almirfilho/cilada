@@ -5,6 +5,6 @@
 
 canvas {
 	position: absolute;
-	/*background: #666;*/
+	background: url(../back.jpg);
 	border: 1px solid #999;
 }

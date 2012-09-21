@@ -22,7 +22,7 @@ config =
   scale: 30
   ball:
     iniX: 30
-    iniY: 30
+    iniY: 35
     radius: 15
   walls:
     qnt: 6
@@ -54,12 +54,25 @@ class Ball
 
   draw: ->
     if game.alive
-      ctx.fillStyle = 'red'
+      @x = @position.x * config.scale
+      @y = @position.y * config.scale
+
+      ctx.save()
+      ctx.fillStyle = ctx.createRadialGradient @x, @y-3, 2, @x, @y, @radius
+      ctx.fillStyle.addColorStop 0, '#eee'
+      ctx.fillStyle.addColorStop 1, '#444'
       ctx.lineCap = 'round'
+
       ctx.beginPath()
-      ctx.arc @position.x * config.scale, @position.y * config.scale, @radius, 0, Math.PI * 2, true
+      ctx.arc @x, @y, @radius, 0, Math.PI * 2, true
       ctx.closePath()
+
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 6;
       ctx.fill()
+      ctx.restore()
 
 class Wall
 
@@ -77,9 +90,24 @@ class Wall
     @b2Obj = world.CreateBody bodyDef
     @b2Obj.CreateFixture fixDef
 
-  draw: ->
-    ctx.fillStyle = '#cccccc'
+  draw: (shadow = null) ->
+    ctx.fillStyle = '#8C4600'
+    ctx.save()
+
+    if shadow is 'block'
+      ctx.shadowColor = '#663300';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 10;
+
+    else if shadow is 'shadow'
+      ctx.shadowColor = 'black';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 12;
+
     ctx.fillRect @x, @y, @width, @height
+    ctx.restore()
 
 class Hole
 
@@ -99,12 +127,24 @@ class Hole
     @b2Obj.CreateFixture fixDef
 
   draw: ->
-    ctx.fillStyle = if @winHole then 'green' else 'blue'
+    ctx.save()
+
+    if @winHole
+      ctx.fillStyle = ctx.createRadialGradient @x+2, @y+5, 12, @x+2, @y+5, @radius+5
+      ctx.fillStyle.addColorStop 0, '#4C6600'
+      ctx.fillStyle.addColorStop 1, 'black'
+    else
+      ctx.fillStyle = ctx.createRadialGradient @x+2, @y+5, 12, @x+2, @y+5, @radius+5
+      ctx.fillStyle.addColorStop 0, '#713203'
+      ctx.fillStyle.addColorStop 1, 'black'
+
     ctx.lineCap = 'round'
     ctx.beginPath()
     ctx.arc @x, @y, @radius, 0, Math.PI * 2, true
     ctx.closePath()
     ctx.fill()
+
+    ctx.restore()
 
 ball    = null
 walls   = []
@@ -166,9 +206,9 @@ init = () ->
   holes.push new Hole 135, 240, r
   holes.push new Hole 175, 70,  r
   holes.push new Hole 270, 150, r
-  holes.push new Hole 301, 370, r
+  holes.push new Hole 301, 375, r
   holes.push new Hole 371, 250, r
-  holes.push new Hole 330, 36,  r
+  holes.push new Hole 330, 46,  r
   holes.push new Hole 468, 110, r
   holes.push new Hole 440, 370, r
   holes.push new Hole 540, 320, r
@@ -229,9 +269,11 @@ update = () ->
       world.DrawDebugData()
     else
       ctx.clearRect 0, 0, config.width, config.height
-      wall.draw() for wall in walls
+      wall.draw('shadow') for wall in walls
       hole.draw() for hole in holes
+      wall.draw('block') for wall in walls
       ball.draw()
+      wall.draw() for wall in walls
 
     world.ClearForces()
     requestAnimFrame update

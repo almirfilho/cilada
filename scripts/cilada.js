@@ -35,7 +35,7 @@
     scale: 30,
     ball: {
       iniX: 30,
-      iniY: 30,
+      iniY: 35,
       radius: 15
     },
     walls: {
@@ -72,12 +72,22 @@
 
     Ball.prototype.draw = function() {
       if (game.alive) {
-        ctx.fillStyle = 'red';
+        this.x = this.position.x * config.scale;
+        this.y = this.position.y * config.scale;
+        ctx.save();
+        ctx.fillStyle = ctx.createRadialGradient(this.x, this.y - 3, 2, this.x, this.y, this.radius);
+        ctx.fillStyle.addColorStop(0, '#eee');
+        ctx.fillStyle.addColorStop(1, '#444');
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.arc(this.position.x * config.scale, this.position.y * config.scale, this.radius, 0, Math.PI * 2, true);
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
         ctx.closePath();
-        return ctx.fill();
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 6;
+        ctx.fill();
+        return ctx.restore();
       }
     };
 
@@ -104,9 +114,25 @@
       this.b2Obj.CreateFixture(fixDef);
     }
 
-    Wall.prototype.draw = function() {
-      ctx.fillStyle = '#cccccc';
-      return ctx.fillRect(this.x, this.y, this.width, this.height);
+    Wall.prototype.draw = function(shadow) {
+      if (shadow == null) {
+        shadow = null;
+      }
+      ctx.fillStyle = '#8C4600';
+      ctx.save();
+      if (shadow === 'block') {
+        ctx.shadowColor = '#663300';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 10;
+      } else if (shadow === 'shadow') {
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 12;
+      }
+      ctx.fillRect(this.x, this.y, this.width, this.height);
+      return ctx.restore();
     };
 
     return Wall;
@@ -134,12 +160,22 @@
     }
 
     Hole.prototype.draw = function() {
-      ctx.fillStyle = this.winHole ? 'green' : 'blue';
+      ctx.save();
+      if (this.winHole) {
+        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
+        ctx.fillStyle.addColorStop(0, '#4C6600');
+        ctx.fillStyle.addColorStop(1, 'black');
+      } else {
+        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
+        ctx.fillStyle.addColorStop(0, '#713203');
+        ctx.fillStyle.addColorStop(1, 'black');
+      }
       ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
       ctx.closePath();
-      return ctx.fill();
+      ctx.fill();
+      return ctx.restore();
     };
 
     return Hole;
@@ -204,9 +240,9 @@
     holes.push(new Hole(135, 240, r));
     holes.push(new Hole(175, 70, r));
     holes.push(new Hole(270, 150, r));
-    holes.push(new Hole(301, 370, r));
+    holes.push(new Hole(301, 375, r));
     holes.push(new Hole(371, 250, r));
-    holes.push(new Hole(330, 36, r));
+    holes.push(new Hole(330, 46, r));
     holes.push(new Hole(468, 110, r));
     holes.push(new Hole(440, 370, r));
     holes.push(new Hole(540, 320, r));
@@ -252,7 +288,7 @@
   };
 
   update = function() {
-    var hole, wall, _i, _j, _len, _len1;
+    var hole, wall, _i, _j, _k, _l, _len, _len1, _len2, _len3;
     if (game.alive) {
       world.Step(1 / 60, 10, 10);
       ball.move();
@@ -262,13 +298,21 @@
         ctx.clearRect(0, 0, config.width, config.height);
         for (_i = 0, _len = walls.length; _i < _len; _i++) {
           wall = walls[_i];
-          wall.draw();
+          wall.draw('shadow');
         }
         for (_j = 0, _len1 = holes.length; _j < _len1; _j++) {
           hole = holes[_j];
           hole.draw();
         }
+        for (_k = 0, _len2 = walls.length; _k < _len2; _k++) {
+          wall = walls[_k];
+          wall.draw('block');
+        }
         ball.draw();
+        for (_l = 0, _len3 = walls.length; _l < _len3; _l++) {
+          wall = walls[_l];
+          wall.draw();
+        }
       }
       world.ClearForces();
       return requestAnimFrame(update);
