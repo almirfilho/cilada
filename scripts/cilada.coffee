@@ -50,6 +50,10 @@ class Ball
     @b2Obj = world.CreateBody bodyDef
     @b2Obj.CreateFixture fixDef
 
+  resetPosition: ->
+    @position = new b2Vec2 config.ball.iniX / config.scale, config.ball.iniY / config.scale
+    @b2Obj.SetPosition @position
+
   move: ->
     @b2Obj.ApplyImpulse @impulse, @b2Obj.GetWorldCenter()
     @position = @b2Obj.GetPosition()
@@ -168,12 +172,34 @@ class Hole
 
     ctx.restore()
 
-ball    = null
-walls   = []
-holes   = []
+class Mallandro
+
+  constructor: ->
+    @ieieBuffer      = null
+    @raaaBuffer      = null
+    @salsiFufuBuffer = null
+    @pegadinhaBuffer = null
+
+  play: (buffer) ->
+    if buffer?
+      @sound        = audio.createBufferSource()
+      @sound.buffer = buffer
+      @sound.connect audio.destination
+      @sound.noteOn 0
+
+  ieie: -> @play @ieieBuffer
+  raaa: -> @play @raaaBuffer
+  salsiFufu: -> @play @salsiFufuBuffer
+  pegadinha: -> @play @pegadinhaBuffer
+
+
+ball      = null
+walls     = []
+holes     = []
+mallandro = null
 
 game =
-  alive: true
+  alive: false
   win:   false
 
 $canvas = $ 'canvas'
@@ -189,19 +215,16 @@ $canvas.attr
   'width': config.width
   'height': config.height
 
-# centralizando o canvas
-$canvas.css
-  'top': "-webkit-calc(50% - #{config.height/2}px)"
-  'left': "-webkit-calc(50% - #{config.width/2}px)"
+# botao de inicio do jogo
+$('#begin').click (e) ->
+  e.preventDefault()
+  beginGame()
 
-init = () ->
+init = ->
   # criando o mundo (gravidade, allowSleep)
   world   = new b2World new b2Vec2(0, 0), true
   fixDef  = new b2FixtureDef
   bodyDef = new b2BodyDef
-  # setando estado inicial do jogo
-  game.alive = true
-  game.win   = false
   # criando os objetos do jogo
   # parede superior
   walls.push new Wall 0, 0, config.width, config.walls.width
@@ -241,10 +264,11 @@ init = () ->
 
   # criando bola
   ball = new Ball config.ball.iniX, config.ball.iniY, config.ball.radius
+  # crinado mallandro
+  mallandro = new Mallandro
 
   # criando instancia de audio context
   if window.webkitAudioContext?
-
     audio = new webkitAudioContext()
     loadSounds()
 
@@ -252,14 +276,12 @@ init = () ->
   orientation = false
 
   if window.DeviceOrientationEvent?
-
     window.addEventListener 'deviceorientation', (orientData) ->
       ball.impulse.x = orientData.gamma / config.scale / 2
       ball.impulse.y = orientData.beta / config.scale / 2
       orientation = true
 
   if window.DeviceMotionEvent? and not orientation
-
     window.addEventListener 'devicemotion', (event) ->
       ball.impulse.x = event.accelerationIncludingGravity.x / config.scale * (-3)
       ball.impulse.y = event.accelerationIncludingGravity.y / config.scale * 3
@@ -287,8 +309,6 @@ init = () ->
     debugDraw.SetFlags b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit
     world.SetDebugDraw debugDraw
 
-  requestAnimFrame update
-
 update = () ->
   if game.alive
     # frequencia, velocidade das iterações, posição das iterações
@@ -313,32 +333,104 @@ update = () ->
   else
     endGame()
 
+beginGame = ->
+  if not game.alive
+    # escondendo menu
+    $('#prompt').animate({top: '-60%'}, 450, 'swing', ->
+      # animando serginho mallandro
+      $('#malandro').animate {top: '5%'}, 400
+      # escondendo overlay
+      $('#overlay').fadeOut( 600, ->
+        # mostrando balao
+        $('#balloon .body').html 'Ié Ié!!'
+        $('#balloon').show()
+        mallandro.ieie()
+
+        setTimeout ->
+          $('#balloon').hide()
+          $('#malandro').animate({top: '100%'}, 400, 'swing', ->
+            # setando estado inicial do jogo
+            game.alive = true
+            game.win   = false
+            ball.resetPosition()
+            # iniciando jogo
+            requestAnimFrame update
+          )
+        , 800
+      )
+    )
+
 endGame = ->
-  if game.win then alert 'ganhou' else alert 'perdeu playboy'
+  [msg, time] = if game.win then ['Glu glu ié ié!', 800] else ['Ráááá!', 2200]
+
+  setTimeout ->
+
+    $('#malandro').animate {top: '5%'}, 300
+    $('#balloon .body').html msg
+    $('#balloon').fadeIn 'slow'
+    if game.win then mallandro.ieie() else mallandro.pegadinha()
+
+    setTimeout ->
+      $('#overlay').fadeIn( 600, ->
+        $('#balloon').hide()
+        $('#malandro').animate({top: '45%'}, 400, 'swing', ->
+          $('#prompt').animate {top: '25%'}, 450
+        )
+      )
+    , time
+  , 600
 
 loadSounds = ->
-  request = new XMLHttpRequest()
-  request.open 'GET', 'sounds/bounce.wav', true
-  request.responseType = 'arraybuffer'
+  # carregando som da bola batendo
+  requestBounce = new XMLHttpRequest()
+  requestBounce.open 'GET', 'sounds/bounce.wav', true
+  requestBounce.responseType = 'arraybuffer'
 
-  request.onload = ->
-    audio.decodeAudioData request.response, (buffer) ->
+  requestBounce.onload = ->
+    audio.decodeAudioData requestBounce.response, (buffer) ->
       ball.bounceBuffer = buffer
     , ->
-      alert 'erro ao ler audio 1'
+      alert 'erro ao ler audio bounce.wav'
 
-  request.send()
+  requestBounce.send()
 
-  request2 = new XMLHttpRequest()
-  request2.open 'GET', 'sounds/die.wav', true
-  request2.responseType = 'arraybuffer'
+  # carregando som da bola caindo
+  requestDie = new XMLHttpRequest()
+  requestDie.open 'GET', 'sounds/die.mp3', true
+  requestDie.responseType = 'arraybuffer'
 
-  request2.onload = ->
-    audio.decodeAudioData request2.response, (buffer) ->
+  requestDie.onload = ->
+    audio.decodeAudioData requestDie.response, (buffer) ->
       ball.dieBuffer = buffer
     , ->
-      alert 'erro ao ler audio 2'
+      alert 'erro ao ler audio die.mp3'
 
-  request2.send()
+  requestDie.send()
+
+  # carregando som ieie (mallandro)
+  requestIeie = new XMLHttpRequest()
+  requestIeie.open 'GET', 'sounds/ieie.mp3', true
+  requestIeie.responseType = 'arraybuffer'
+
+  requestIeie.onload = ->
+    audio.decodeAudioData requestIeie.response, (buffer) ->
+      mallandro.ieieBuffer = buffer
+    , ->
+      alert 'erro ao ler audio ieie.mp3'
+
+  requestIeie.send()
+
+  # carregando som pegadinha (mallandro)
+  requestPegadinha = new XMLHttpRequest()
+  requestPegadinha.open 'GET', 'sounds/pegadinha.mp3', true
+  requestPegadinha.responseType = 'arraybuffer'
+
+  requestPegadinha.onload = ->
+    audio.decodeAudioData requestPegadinha.response, (buffer) ->
+      mallandro.pegadinhaBuffer = buffer
+    , ->
+      alert 'erro ao ler audio ieie.mp3'
+
+  requestPegadinha.send()
 
 init()

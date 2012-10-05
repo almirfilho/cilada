@@ -9,7 +9,22 @@
 </head>
 <body>
 
-	<canvas id="canvas"></canvas>
+	<section id="stage" class="layer">
+		<canvas id="canvas"></canvas>
+		<div id="malandro"></div>
+		<div id="balloon">
+			<div class="body">Salsi Fu Fu!</div>
+			<div class="seta"></div>
+		</div>
+	</section>
+
+	<section id="overlay" class="layer">
+		<div id="prompt">
+			<h3>Cilada do Malandro!</h3>
+			<p>Controle a bolinha movimentando seu computador. Desvie de todos os buracos até chegar ao último <span class="verde">verde</span>. <span class="bold">Ié ié!</span></p>
+			<button id="begin">Ráááá!</button>
+		</div>
+	</section>
 
 	<script type="text/javascript" src="scripts/jquery.min.js"></script>
 	<script type="text/javascript" src="scripts/box2d.min.js"></script>

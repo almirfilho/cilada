@@ -3,8 +3,142 @@
 	margin: 0;
 }
 
-canvas {
-	position: absolute;
-	background: url(../images/back.jpg);
-	border: 1px solid #999;
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	letter-spacing: -0.1em;
 }
+
+.bold {
+	font-weight: bold;
+	font-style: italic;
+}
+
+.verde {
+	background-color: green;
+	color: rgba(255,255,255,0.8);
+	padding: 0px 3px;
+	border-radius: 4px;
+}
+
+.layer {
+	position: absolute;
+	width: 700px;
+	height: 432px;
+	top: 50%;
+	left: 50%;
+	margin-top: -216px;
+	margin-left: -350px;
+}
+
+#stage {
+	overflow: hidden;
+}
+
+canvas {
+	background: url(../images/back.jpg);
+	width: 100%;
+	height: 100%;
+}
+
+#malandro {
+	position: absolute;
+	width: 700px;
+	height: 432px;
+	top: 45%;
+	background: url(../images/malandro.png);
+}
+
+#balloon {
+	display: none;
+}
+
+	#balloon .body {
+		position: absolute;
+		background: white;
+		top: 72px;
+		left: 87px;
+		border-radius: 50%;
+		font-size: 28px;
+		width: 204px;
+		height: 96px;
+		line-height: 96px;
+		text-align: center;
+		z-index: 2;
+	}
+
+	#balloon .seta {
+		position: absolute;
+		top: 139px;
+		left: 232px;
+		width: 1px;
+		height: 1px;
+		border-left: 31px solid transparent;
+		border-bottom: 18px solid white;
+		border-right: 39px solid transparent;
+		z-index: 1;
+	}
+
+#overlay {
+	background: rgba(0,0,0,0.6);
+	overflow: hidden;
+	z-index: 100;
+}
+
+#prompt {
+	width: 300px;
+	height: 186px;
+	top: 25%;
+	left: 25%;
+	position: relative;
+	border-radius: 8px;
+	background: rgba(255,255,255,0.3);
+	border: 5px solid rgba(255, 255, 255, 0.1);
+	padding: 20px 20px 0px 20px;
+	box-shadow: 0px 0px 10px black;
+	color: #ccc;
+	text-align: center;
+}
+
+#prompt:before {
+	content: "";
+	position: absolute;
+	left: 85px;
+	top: 211px;
+	width: 0;
+	height: 0;
+	border-left: 20px solid transparent;
+	border-right: 9px solid transparent;
+	border-top: 35px solid rgba(255, 255, 255, 0.4);
+}
+
+	#prompt h3 {
+		font-size: 30px;
+		margin-bottom: 15px;
+		text-shadow: 1px 1px 3px black;
+	}
+
+	#prompt p {
+		letter-spacing: 0.1em;
+		color: white;
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: 100;
+	}
+
+	#prompt button {
+		margin-top: 20px;
+		border: none;
+		padding: 7px 10px;
+		font-size: 16px;
+		border-radius: 5px;
+		color: #333;
+		box-shadow: 0px 1px 5px black;
+		background: whiteSmoke;
+		font-weight: bold;
+		cursor: pointer;
+	}
+
+	#prompt button:hover {
+		background: green;
+		color: white;
+	}
