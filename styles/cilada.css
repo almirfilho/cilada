@@ -6,6 +6,7 @@
 body {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	letter-spacing: -0.1em;
+	background: #8C4600;
 }
 
 .bold {
@@ -115,15 +116,32 @@ canvas {
 		font-size: 30px;
 		margin-bottom: 15px;
 		text-shadow: 1px 1px 3px black;
+		color: #FF4D4D;
 	}
 
 	#prompt p {
-		letter-spacing: 0.1em;
+		letter-spacing: 0px;
 		color: white;
-		font-size: 14px;
+		font-size: 15px;
 		line-height: 20px;
 		font-weight: 100;
 	}
+
+	#prompt p.no-support {
+
+	}
+
+		#prompt p.no-support span {
+			font-weight: bold;
+		}
+
+		#prompt p.no-support span.chrome {
+			color: #99B3FF;
+		}
+
+		#prompt p.no-support span.firefox {
+			color: #FFB973;
+		}
 
 	#prompt button {
 		margin-top: 20px;

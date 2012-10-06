@@ -8,6 +8,16 @@ window.AudioContext = (->
   window.AudioContext or window.webkitAudioContext or window.mozAudioContext or window.oAudioContext or window.msAudioContext
 )();
 
+window.DeviceOrientationEvent = (->
+  window.DeviceOrientationEvent or window.webkitDeviceOrientationEvent or window.mozDeviceOrientationEvent or
+  window.oDeviceOrientationEvent or window.msDeviceOrientationEvent
+)();
+
+window.DeviceMotionEvent = (->
+  window.DeviceMotionEvent or window.webkitDeviceMotionEvent or window.mozDeviceMotionEvent or
+  window.oDeviceMotionEvent or window.msDeviceMotionEvent
+)();
+
 b2Vec2            = Box2D.Common.Math.b2Vec2
 b2BodyDef         = Box2D.Dynamics.b2BodyDef
 b2Body            = Box2D.Dynamics.b2Body
@@ -60,6 +70,11 @@ $('#begin').click (event) ->
   beginGame()
 
 init = ->
+
+  if not (window.DeviceOrientationEvent? or window.DeviceMotionEvent?)
+    $('#prompt p, #prompt button').remove()
+    $('#prompt').append '<p class="no-support"><strong>Pôôo meu irmão!!</strong><br />Seu navegador não tem suporte a <strong>Acelerômetro</strong>!<br />Tente no <span class="chrome">Google Chrome</span> ou <span class="firefox">Mozilla Firefox</span> ;)</p>'
+
   # criando o mundo (gravidade, allowSleep)
   world   = new b2World new b2Vec2(0, 0), true
   fixDef  = new b2FixtureDef
@@ -201,7 +216,6 @@ endGame = ->
   [msg, time] = if game.win then ['Glu glu ié ié!', 800] else ['Ráááá!', 2200]
 
   setTimeout ->
-
     $('#malandro').animate {top: '5%'}, 300
     $('#balloon .body').html msg
     $('#balloon').fadeIn 'slow'
@@ -276,9 +290,9 @@ loadSounds = ->
     requestPegadinha.send()
 
   else
-    ball.bounceBuffer = $('<audio src="sounds/bounce.wav" preload></audio>').appendTo('body')[0]
-    ball.dieBuffer = $('<audio src="sounds/die.ogg" preload></audio>').appendTo('body')[0]
-    mallandro.ieieBuffer = $('<audio src="sounds/ieie.ogg" preload></audio>').appendTo('body')[0]
+    ball.bounceBuffer         = $('<audio src="sounds/bounce.wav" preload></audio>').appendTo('body')[0]
+    ball.dieBuffer            = $('<audio src="sounds/die.ogg" preload></audio>').appendTo('body')[0]
+    mallandro.ieieBuffer      = $('<audio src="sounds/ieie.ogg" preload></audio>').appendTo('body')[0]
     mallandro.pegadinhaBuffer = $('<audio src="sounds/pegadinha.ogg" preload></audio>').appendTo('body')[0]
 
 init()

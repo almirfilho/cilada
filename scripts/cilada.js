@@ -231,6 +231,14 @@
     return window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext;
   })();
 
+  window.DeviceOrientationEvent = (function() {
+    return window.DeviceOrientationEvent || window.webkitDeviceOrientationEvent || window.mozDeviceOrientationEvent || window.oDeviceOrientationEvent || window.msDeviceOrientationEvent;
+  })();
+
+  window.DeviceMotionEvent = (function() {
+    return window.DeviceMotionEvent || window.webkitDeviceMotionEvent || window.mozDeviceMotionEvent || window.oDeviceMotionEvent || window.msDeviceMotionEvent;
+  })();
+
   b2Vec2 = Box2D.Common.Math.b2Vec2;
 
   b2BodyDef = Box2D.Dynamics.b2BodyDef;
@@ -306,6 +314,10 @@
 
   init = function() {
     var debugDraw, h, i, orientation, r, w, x, y, _i, _ref;
+    if (!((window.DeviceOrientationEvent != null) || (window.DeviceMotionEvent != null))) {
+      $('#prompt p, #prompt button').remove();
+      $('#prompt').append('<p class="no-support"><strong>Pôôo meu irmão!!</strong><br />Seu navegador não tem suporte a <strong>Acelerômetro</strong>!<br />Tente no <span class="chrome">Google Chrome</span> ou <span class="firefox">Mozilla Firefox</span> ;)</p>');
+    }
     world = new b2World(new b2Vec2(0, 0), true);
     fixDef = new b2FixtureDef;
     bodyDef = new b2BodyDef;
