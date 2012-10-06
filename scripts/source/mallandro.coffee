@@ -8,10 +8,13 @@ class Mallandro
 
   play: (buffer) ->
     if buffer?
-      @sound        = audio.createBufferSource()
-      @sound.buffer = buffer
-      @sound.connect audio.destination
-      @sound.noteOn 0
+      if window.AudioContext?
+        @sound        = audio.createBufferSource()
+        @sound.buffer = buffer
+        @sound.connect audio.destination
+        @sound.noteOn 0
+      else
+        buffer.play()
 
   ieie: -> @play @ieieBuffer
   raaa: -> @play @raaaBuffer

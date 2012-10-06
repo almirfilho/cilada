@@ -38,23 +38,31 @@
     Ball.prototype.play = function() {
       var velocity;
       if (this.bounceBuffer != null) {
-        this.sound = audio.createBufferSource();
-        this.sound.buffer = this.bounceBuffer;
-        this.gainNode = audio.createGainNode();
-        this.sound.connect(this.gainNode);
-        this.gainNode.connect(audio.destination);
-        velocity = this.b2Obj.GetLinearVelocity();
-        this.gainNode.gain.value = (velocity.x * velocity.x + velocity.y * velocity.y) / 40;
-        return this.sound.noteOn(0);
+        if (window.AudioContext != null) {
+          this.sound = audio.createBufferSource();
+          this.sound.buffer = this.bounceBuffer;
+          this.gainNode = audio.createGainNode();
+          this.sound.connect(this.gainNode);
+          this.gainNode.connect(audio.destination);
+          velocity = this.b2Obj.GetLinearVelocity();
+          this.gainNode.gain.value = (velocity.x * velocity.x + velocity.y * velocity.y) / 40;
+          return this.sound.noteOn(0);
+        } else {
+          return this.bounceBuffer.play();
+        }
       }
     };
 
     Ball.prototype.playDead = function() {
       if (this.dieBuffer != null) {
-        this.sound = audio.createBufferSource();
-        this.sound.buffer = this.dieBuffer;
-        this.sound.connect(audio.destination);
-        return this.sound.noteOn(0);
+        if (window.AudioContext != null) {
+          this.sound = audio.createBufferSource();
+          this.sound.buffer = this.dieBuffer;
+          this.sound.connect(audio.destination);
+          return this.sound.noteOn(0);
+        } else {
+          return this.dieBuffer.play();
+        }
       }
     };
 
@@ -182,10 +190,14 @@
 
     Mallandro.prototype.play = function(buffer) {
       if (buffer != null) {
-        this.sound = audio.createBufferSource();
-        this.sound.buffer = buffer;
-        this.sound.connect(audio.destination);
-        return this.sound.noteOn(0);
+        if (window.AudioContext != null) {
+          this.sound = audio.createBufferSource();
+          this.sound.buffer = buffer;
+          this.sound.connect(audio.destination);
+          return this.sound.noteOn(0);
+        } else {
+          return buffer.play();
+        }
       }
     };
 
@@ -326,10 +338,7 @@
     holes.push(new Hole(643, 390, r, true));
     ball = new Ball(config.ball.iniX, config.ball.iniY, config.ball.radius);
     mallandro = new Mallandro;
-    if (window.AudioContext != null) {
-      audio = new AudioContext();
-      loadSounds();
-    }
+    loadSounds();
     orientation = false;
     if (window.DeviceOrientationEvent != null) {
       window.addEventListener('deviceorientation', function(orientData) {
@@ -450,50 +459,58 @@
 
   loadSounds = function() {
     var requestBounce, requestDie, requestIeie, requestPegadinha;
-    requestBounce = new XMLHttpRequest();
-    requestBounce.open('GET', 'sounds/bounce.wav', true);
-    requestBounce.responseType = 'arraybuffer';
-    requestBounce.onload = function() {
-      return audio.decodeAudioData(requestBounce.response, function(buffer) {
-        return ball.bounceBuffer = buffer;
-      }, function() {
-        return alert('erro ao ler audio bounce.wav');
-      });
-    };
-    requestBounce.send();
-    requestDie = new XMLHttpRequest();
-    requestDie.open('GET', 'sounds/die.mp3', true);
-    requestDie.responseType = 'arraybuffer';
-    requestDie.onload = function() {
-      return audio.decodeAudioData(requestDie.response, function(buffer) {
-        return ball.dieBuffer = buffer;
-      }, function() {
-        return alert('erro ao ler audio die.mp3');
-      });
-    };
-    requestDie.send();
-    requestIeie = new XMLHttpRequest();
-    requestIeie.open('GET', 'sounds/ieie.mp3', true);
-    requestIeie.responseType = 'arraybuffer';
-    requestIeie.onload = function() {
-      return audio.decodeAudioData(requestIeie.response, function(buffer) {
-        return mallandro.ieieBuffer = buffer;
-      }, function() {
-        return alert('erro ao ler audio ieie.mp3');
-      });
-    };
-    requestIeie.send();
-    requestPegadinha = new XMLHttpRequest();
-    requestPegadinha.open('GET', 'sounds/pegadinha.mp3', true);
-    requestPegadinha.responseType = 'arraybuffer';
-    requestPegadinha.onload = function() {
-      return audio.decodeAudioData(requestPegadinha.response, function(buffer) {
-        return mallandro.pegadinhaBuffer = buffer;
-      }, function() {
-        return alert('erro ao ler audio ieie.mp3');
-      });
-    };
-    return requestPegadinha.send();
+    if (window.AudioContext != null) {
+      audio = new AudioContext();
+      requestBounce = new XMLHttpRequest();
+      requestBounce.open('GET', 'sounds/bounce.wav', true);
+      requestBounce.responseType = 'arraybuffer';
+      requestBounce.onload = function() {
+        return audio.decodeAudioData(requestBounce.response, function(buffer) {
+          return ball.bounceBuffer = buffer;
+        }, function() {
+          return alert('erro ao ler audio bounce.wav');
+        });
+      };
+      requestBounce.send();
+      requestDie = new XMLHttpRequest();
+      requestDie.open('GET', 'sounds/die.mp3', true);
+      requestDie.responseType = 'arraybuffer';
+      requestDie.onload = function() {
+        return audio.decodeAudioData(requestDie.response, function(buffer) {
+          return ball.dieBuffer = buffer;
+        }, function() {
+          return alert('erro ao ler audio die.mp3');
+        });
+      };
+      requestDie.send();
+      requestIeie = new XMLHttpRequest();
+      requestIeie.open('GET', 'sounds/ieie.mp3', true);
+      requestIeie.responseType = 'arraybuffer';
+      requestIeie.onload = function() {
+        return audio.decodeAudioData(requestIeie.response, function(buffer) {
+          return mallandro.ieieBuffer = buffer;
+        }, function() {
+          return alert('erro ao ler audio ieie.mp3');
+        });
+      };
+      requestIeie.send();
+      requestPegadinha = new XMLHttpRequest();
+      requestPegadinha.open('GET', 'sounds/pegadinha.mp3', true);
+      requestPegadinha.responseType = 'arraybuffer';
+      requestPegadinha.onload = function() {
+        return audio.decodeAudioData(requestPegadinha.response, function(buffer) {
+          return mallandro.pegadinhaBuffer = buffer;
+        }, function() {
+          return alert('erro ao ler audio ieie.mp3');
+        });
+      };
+      return requestPegadinha.send();
+    } else {
+      ball.bounceBuffer = $('<audio src="sounds/bounce.wav" preload></audio>').appendTo('body')[0];
+      ball.dieBuffer = $('<audio src="sounds/die.ogg" preload></audio>').appendTo('body')[0];
+      mallandro.ieieBuffer = $('<audio src="sounds/ieie.ogg" preload></audio>').appendTo('body')[0];
+      return mallandro.pegadinhaBuffer = $('<audio src="sounds/pegadinha.ogg" preload></audio>').appendTo('body')[0];
+    }
   };
 
   init();

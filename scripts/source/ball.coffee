@@ -30,22 +30,28 @@ class Ball
 
   play: ->
     if @bounceBuffer?
-      @sound        = audio.createBufferSource()
-      @sound.buffer = @bounceBuffer
-      @gainNode     = audio.createGainNode()
+      if window.AudioContext?
+        @sound        = audio.createBufferSource()
+        @sound.buffer = @bounceBuffer
+        @gainNode     = audio.createGainNode()
 
-      @sound.connect @gainNode
-      @gainNode.connect audio.destination
-      velocity = @b2Obj.GetLinearVelocity()
-      @gainNode.gain.value = (velocity.x * velocity.x + velocity.y * velocity.y) / 40
-      @sound.noteOn 0
+        @sound.connect @gainNode
+        @gainNode.connect audio.destination
+        velocity = @b2Obj.GetLinearVelocity()
+        @gainNode.gain.value = (velocity.x * velocity.x + velocity.y * velocity.y) / 40
+        @sound.noteOn 0
+      else
+        @bounceBuffer.play()
 
   playDead: ->
     if @dieBuffer?
-      @sound        = audio.createBufferSource()
-      @sound.buffer = @dieBuffer
-      @sound.connect audio.destination
-      @sound.noteOn 0
+      if window.AudioContext?
+        @sound        = audio.createBufferSource()
+        @sound.buffer = @dieBuffer
+        @sound.connect audio.destination
+        @sound.noteOn 0
+      else
+        @dieBuffer.play()
 
   draw: ->
     if game.alive

@@ -106,10 +106,8 @@ init = ->
   # crinado mallandro
   mallandro = new Mallandro
 
-  # criando instancia de audio context
-  if window.AudioContext?
-    audio = new AudioContext()
-    loadSounds()
+  # carregando efeitos sonoros
+  loadSounds()
 
   # capturando eventos do acelerometro
   orientation = false
@@ -220,56 +218,67 @@ endGame = ->
   , 600
 
 loadSounds = ->
-  # carregando som da bola batendo
-  requestBounce = new XMLHttpRequest()
-  requestBounce.open 'GET', 'sounds/bounce.wav', true
-  requestBounce.responseType = 'arraybuffer'
 
-  requestBounce.onload = ->
-    audio.decodeAudioData requestBounce.response, (buffer) ->
-      ball.bounceBuffer = buffer
-    , ->
-      alert 'erro ao ler audio bounce.wav'
+  if window.AudioContext?
+    # criando instancia de audio context
+    audio = new AudioContext()
 
-  requestBounce.send()
+    # carregando som da bola batendo
+    requestBounce = new XMLHttpRequest()
+    requestBounce.open 'GET', 'sounds/bounce.wav', true
+    requestBounce.responseType = 'arraybuffer'
 
-  # carregando som da bola caindo
-  requestDie = new XMLHttpRequest()
-  requestDie.open 'GET', 'sounds/die.mp3', true
-  requestDie.responseType = 'arraybuffer'
+    requestBounce.onload = ->
+      audio.decodeAudioData requestBounce.response, (buffer) ->
+        ball.bounceBuffer = buffer
+      , ->
+        alert 'erro ao ler audio bounce.wav'
 
-  requestDie.onload = ->
-    audio.decodeAudioData requestDie.response, (buffer) ->
-      ball.dieBuffer = buffer
-    , ->
-      alert 'erro ao ler audio die.mp3'
+    requestBounce.send()
 
-  requestDie.send()
+    # carregando som da bola caindo
+    requestDie = new XMLHttpRequest()
+    requestDie.open 'GET', 'sounds/die.mp3', true
+    requestDie.responseType = 'arraybuffer'
 
-  # carregando som ieie (mallandro)
-  requestIeie = new XMLHttpRequest()
-  requestIeie.open 'GET', 'sounds/ieie.mp3', true
-  requestIeie.responseType = 'arraybuffer'
+    requestDie.onload = ->
+      audio.decodeAudioData requestDie.response, (buffer) ->
+        ball.dieBuffer = buffer
+      , ->
+        alert 'erro ao ler audio die.mp3'
 
-  requestIeie.onload = ->
-    audio.decodeAudioData requestIeie.response, (buffer) ->
-      mallandro.ieieBuffer = buffer
-    , ->
-      alert 'erro ao ler audio ieie.mp3'
+    requestDie.send()
 
-  requestIeie.send()
+    # carregando som ieie (mallandro)
+    requestIeie = new XMLHttpRequest()
+    requestIeie.open 'GET', 'sounds/ieie.mp3', true
+    requestIeie.responseType = 'arraybuffer'
 
-  # carregando som pegadinha (mallandro)
-  requestPegadinha = new XMLHttpRequest()
-  requestPegadinha.open 'GET', 'sounds/pegadinha.mp3', true
-  requestPegadinha.responseType = 'arraybuffer'
+    requestIeie.onload = ->
+      audio.decodeAudioData requestIeie.response, (buffer) ->
+        mallandro.ieieBuffer = buffer
+      , ->
+        alert 'erro ao ler audio ieie.mp3'
 
-  requestPegadinha.onload = ->
-    audio.decodeAudioData requestPegadinha.response, (buffer) ->
-      mallandro.pegadinhaBuffer = buffer
-    , ->
-      alert 'erro ao ler audio ieie.mp3'
+    requestIeie.send()
 
-  requestPegadinha.send()
+    # carregando som pegadinha (mallandro)
+    requestPegadinha = new XMLHttpRequest()
+    requestPegadinha.open 'GET', 'sounds/pegadinha.mp3', true
+    requestPegadinha.responseType = 'arraybuffer'
+
+    requestPegadinha.onload = ->
+      audio.decodeAudioData requestPegadinha.response, (buffer) ->
+        mallandro.pegadinhaBuffer = buffer
+      , ->
+        alert 'erro ao ler audio ieie.mp3'
+
+    requestPegadinha.send()
+
+  else
+    ball.bounceBuffer = $('<audio src="sounds/bounce.wav" preload></audio>').appendTo('body')[0]
+    ball.dieBuffer = $('<audio src="sounds/die.ogg" preload></audio>').appendTo('body')[0]
+    mallandro.ieieBuffer = $('<audio src="sounds/ieie.ogg" preload></audio>').appendTo('body')[0]
+    mallandro.pegadinhaBuffer = $('<audio src="sounds/pegadinha.ogg" preload></audio>').appendTo('body')[0]
 
 init()
