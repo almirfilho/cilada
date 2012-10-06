@@ -2,48 +2,6 @@
 (function() {
   var $canvas, Ball, Hole, Mallandro, Wall, audio, b2Body, b2BodyDef, b2CircleShape, b2ContactListener, b2DebugDraw, b2Fixture, b2FixtureDef, b2PolygonShape, b2Vec2, b2World, ball, beginGame, bodyDef, config, contact, ctx, endGame, fixDef, game, holes, init, loadSounds, mallandro, update, walls, world;
 
-  window.requestAnimFrame = (function() {
-    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback, element) {
-      return window.setTimeout(callback, 1000 / 60);
-    };
-  })();
-
-  b2Vec2 = Box2D.Common.Math.b2Vec2;
-
-  b2BodyDef = Box2D.Dynamics.b2BodyDef;
-
-  b2Body = Box2D.Dynamics.b2Body;
-
-  b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
-
-  b2Fixture = Box2D.Dynamics.b2Fixture;
-
-  b2World = Box2D.Dynamics.b2World;
-
-  b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
-
-  b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
-
-  b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
-
-  b2ContactListener = Box2D.Dynamics.b2ContactListener;
-
-  config = {
-    debug: false,
-    width: 700,
-    height: 432,
-    scale: 30,
-    ball: {
-      iniX: 30,
-      iniY: 35,
-      radius: 15
-    },
-    walls: {
-      qnt: 6,
-      width: 15
-    }
-  };
-
   Ball = (function() {
 
     function Ball(x, y, radius) {
@@ -125,6 +83,49 @@
 
   })();
 
+  Hole = (function() {
+
+    function Hole(x, y, radius, winHole) {
+      this.x = x;
+      this.y = y;
+      this.radius = radius;
+      this.winHole = winHole != null ? winHole : false;
+      fixDef.density = 1;
+      fixDef.friction = 1;
+      fixDef.restitution = 0;
+      fixDef.shape = new b2CircleShape(this.radius / config.scale / 4);
+      bodyDef.type = b2Body.b2_staticBody;
+      bodyDef.position.x = this.x / config.scale;
+      bodyDef.position.y = this.y / config.scale;
+      bodyDef.linearDamping = 1;
+      bodyDef.userData = this;
+      this.b2Obj = world.CreateBody(bodyDef);
+      this.b2Obj.CreateFixture(fixDef);
+    }
+
+    Hole.prototype.draw = function() {
+      ctx.save();
+      if (this.winHole) {
+        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
+        ctx.fillStyle.addColorStop(0, '#4C6600');
+        ctx.fillStyle.addColorStop(1, 'black');
+      } else {
+        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
+        ctx.fillStyle.addColorStop(0, '#713203');
+        ctx.fillStyle.addColorStop(1, 'black');
+      }
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.fill();
+      return ctx.restore();
+    };
+
+    return Hole;
+
+  })();
+
   Wall = (function() {
 
     function Wall(x, y, width, height) {
@@ -170,49 +171,6 @@
 
   })();
 
-  Hole = (function() {
-
-    function Hole(x, y, radius, winHole) {
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-      this.winHole = winHole != null ? winHole : false;
-      fixDef.density = 1;
-      fixDef.friction = 1;
-      fixDef.restitution = 0;
-      fixDef.shape = new b2CircleShape(this.radius / config.scale / 4);
-      bodyDef.type = b2Body.b2_staticBody;
-      bodyDef.position.x = this.x / config.scale;
-      bodyDef.position.y = this.y / config.scale;
-      bodyDef.linearDamping = 1;
-      bodyDef.userData = this;
-      this.b2Obj = world.CreateBody(bodyDef);
-      this.b2Obj.CreateFixture(fixDef);
-    }
-
-    Hole.prototype.draw = function() {
-      ctx.save();
-      if (this.winHole) {
-        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
-        ctx.fillStyle.addColorStop(0, '#4C6600');
-        ctx.fillStyle.addColorStop(1, 'black');
-      } else {
-        ctx.fillStyle = ctx.createRadialGradient(this.x + 2, this.y + 5, 12, this.x + 2, this.y + 5, this.radius + 5);
-        ctx.fillStyle.addColorStop(0, '#713203');
-        ctx.fillStyle.addColorStop(1, 'black');
-      }
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.fill();
-      return ctx.restore();
-    };
-
-    return Hole;
-
-  })();
-
   Mallandro = (function() {
 
     function Mallandro() {
@@ -251,6 +209,52 @@
 
   })();
 
+  window.requestAnimFrame = (function() {
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback, element) {
+      return window.setTimeout(callback, 1000 / 60);
+    };
+  })();
+
+  window.AudioContext = (function() {
+    return window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.oAudioContext || window.msAudioContext;
+  })();
+
+  b2Vec2 = Box2D.Common.Math.b2Vec2;
+
+  b2BodyDef = Box2D.Dynamics.b2BodyDef;
+
+  b2Body = Box2D.Dynamics.b2Body;
+
+  b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+
+  b2Fixture = Box2D.Dynamics.b2Fixture;
+
+  b2World = Box2D.Dynamics.b2World;
+
+  b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+
+  b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+
+  b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+
+  b2ContactListener = Box2D.Dynamics.b2ContactListener;
+
+  config = {
+    debug: false,
+    width: 700,
+    height: 432,
+    scale: 30,
+    ball: {
+      iniX: 30,
+      iniY: 35,
+      radius: 15
+    },
+    walls: {
+      qnt: 6,
+      width: 15
+    }
+  };
+
   ball = null;
 
   walls = [];
@@ -283,8 +287,8 @@
     'height': config.height
   });
 
-  $('#begin').click(function(e) {
-    e.preventDefault();
+  $('#begin').click(function(event) {
+    event.preventDefault();
     return beginGame();
   });
 
@@ -322,8 +326,8 @@
     holes.push(new Hole(643, 390, r, true));
     ball = new Ball(config.ball.iniX, config.ball.iniY, config.ball.radius);
     mallandro = new Mallandro;
-    if (window.webkitAudioContext != null) {
-      audio = new webkitAudioContext();
+    if (window.AudioContext != null) {
+      audio = new AudioContext();
       loadSounds();
     }
     orientation = false;
