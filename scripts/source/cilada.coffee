@@ -58,6 +58,8 @@ world   = null
 fixDef  = null
 bodyDef = null
 contact = null
+hasAccelerationDevice  = false
+hasAccelerationSupport = false
 
 # dimensionando o canvas
 $canvas.attr
@@ -70,10 +72,13 @@ $('#begin').click (event) ->
   beginGame()
 
 init = ->
-
-  if not (window.DeviceOrientationEvent? or window.DeviceMotionEvent?)
-    $('#prompt p, #prompt button').remove()
-    $('#prompt').append '<p class="no-support"><strong>Pôôo meu irmão!!</strong><br />Seu navegador não tem suporte a <strong>Acelerômetro</strong>!<br />Tente no <span class="chrome">Google Chrome</span> ou <span class="firefox">Mozilla Firefox</span> ;)</p>'
+  # testa se tem suporte/hardware de aceletometro
+  return if not hasAccelerometer()
+  setTimeout ->
+    if not hasAccelerationSupport
+      $('#prompt p, #prompt button').remove()
+      $('#prompt').append '<p class="no-support"><strong>Pôôo meu irmão!!</strong><br />Seu computador não tem <strong>Acelerômetro</strong>!<br />Buy a mac ;)</p>'
+  , 20
 
   # criando o mundo (gravidade, allowSleep)
   world   = new b2World new b2Vec2(0, 0), true
@@ -137,7 +142,6 @@ init = ->
     window.addEventListener 'devicemotion', (event) ->
       ball.impulse.x = event.accelerationIncludingGravity.x / config.scale * (-3)
       ball.impulse.y = event.accelerationIncludingGravity.y / config.scale * 3
-      orientation = true
 
   # listener de colisoes
   contact = new b2ContactListener
@@ -294,5 +298,22 @@ loadSounds = ->
     ball.dieBuffer            = $('<audio src="sounds/die.ogg" preload></audio>').appendTo('body')[0]
     mallandro.ieieBuffer      = $('<audio src="sounds/ieie.ogg" preload></audio>').appendTo('body')[0]
     mallandro.pegadinhaBuffer = $('<audio src="sounds/pegadinha.ogg" preload></audio>').appendTo('body')[0]
+
+hasAccelerometer = ->
+  if not (window.DeviceOrientationEvent? or window.DeviceMotionEvent?)
+    $('#prompt p, #prompt button').remove()
+    $('#prompt').append '<p class="no-support"><strong>Pôôo meu irmão!!</strong><br />Seu navegador não tem suporte a <strong>Acelerômetro</strong>!<br />Tente no <span class="chrome">Google Chrome</span> ou <span class="firefox">Mozilla Firefox</span> ;)</p>'
+    false
+
+  if window.DeviceOrientationEvent?
+    window.addEventListener 'deviceorientation', (orientData) ->
+      hasAccelerationDevice = true
+
+  if window.DeviceMotionEvent?
+    window.addEventListener 'devicemotion', (event) ->
+      hasAccelerationDevice = true
+
+  hasAccelerationSupport = true
+  true
 
 init()
