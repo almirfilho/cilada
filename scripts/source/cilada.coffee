@@ -125,10 +125,8 @@ init = ->
   ball = new Ball config.ball.iniX, config.ball.iniY, config.ball.radius
   # crinado mallandro
   mallandro = new Mallandro
-
   # carregando efeitos sonoros
   loadSounds()
-
   # capturando eventos do acelerometro
   orientation = false
 
@@ -240,7 +238,6 @@ loadSounds = ->
   if window.AudioContext?
     # criando instancia de audio context
     audio = new AudioContext()
-
     # carregando som da bola batendo
     requestBounce = new XMLHttpRequest()
     requestBounce.open 'GET', 'sounds/bounce.wav', true
